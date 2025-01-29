@@ -57,15 +57,16 @@ const addUser = function (user) {
  */
 const getAllReservations = function (guest_id, limit = 10) {
   
-  const values = [guest_id];
+  const values = [guest_id,limit];
   const queryString = `
-  SELECT *, properties.*
-  FROM reservations
-  RIGHT JOIN properties ON reservations.property_id = properties.id
-  WHERE reservations.guest_id = $1
-  GROUP BY properties.id, reservations.id
-  ORDER BY reservations.start_date
-  LIMIT ${limit};
+SELECT reservations.id, properties.*, reservations.start_date, avg(rating) as average_rating
+FROM reservations
+JOIN properties ON reservations.property_id = properties.id
+JOIN property_reviews ON properties.id = property_reviews.property_id
+WHERE reservations.guest_id = $1
+GROUP BY properties.id, reservations.id
+ORDER BY reservations.start_date
+LIMIT $2;
   `;
 
   return pool

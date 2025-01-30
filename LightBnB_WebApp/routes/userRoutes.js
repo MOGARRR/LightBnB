@@ -24,7 +24,6 @@ router.post("/", (req, res) => {
       const email = req.body.email;
       const password = user.password;
       const values = [name,email,password];
-      console.log(values);
 
       const queryString = `
       INSERT INTO users (name,email,password)
@@ -32,21 +31,21 @@ router.post("/", (req, res) => {
       RETURNING *;
       `;
       return pool
-      .query(queryString,values).then((results) => {
-        user = results.rows[0];
-        if (!user) {
-          return res.send({ error: "error" });
-        }
+        .query(queryString,values).then((results) => {
+          user = results.rows[0];
+          if (!user) {
+            return res.send({ error: "error" });
+          }
 
-        req.session.userId = user.id;
-        res.send({user});
-        return user;
-      }).catch((err) => {
-        console.log(err.message);
-      });
+          req.session.userId = user.id;
+          res.send({user});
+          return user;
+        }).catch((err) => {
+          console.log(err.message);
+        });
 
    
-    })
+    });
 });
 
 // Log a user in
@@ -63,23 +62,22 @@ router.post("/login", (req, res) => {
     ;`;
 
     return pool
-    .query(queryString,values).then((result) => {
-      user = result.rows[0];
-      if (!user) {
-        console.log(null);
-        return null;
-      }
-      if (!bcrypt.compareSync(password, user.password)) { // FIGURE OUT ERROR HERE
-        return res.send({ error: "error" });
-      }  
-      console.log(user);
-      req.session.userId = user.id;
-      res.send({user});
-      return user;
+      .query(queryString,values).then((result) => {
+        user = result.rows[0];
+        if (!user) {
+          return null;
+        }
+        if (!bcrypt.compareSync(password, user.password)) {
+          return res.send({ error: "error" });
+        }
 
-    }).catch((err) => {
-      console.log(err.message);
-    });
+        req.session.userId = user.id;
+        res.send({user});
+        return user;
+
+      }).catch((err) => {
+        console.log(err.message);
+      });
   });
 });
 
@@ -107,19 +105,19 @@ router.get("/me", (req, res) => {
       ;`;
 
       return pool
-      .query(queryString,values).then((result) => {
-        user = result.rows[0];
-        if (!user) {
-          console.log(null);
-          return null;
-        }
-        req.session.userId = user.id;
-        res.send({user});
-        return user;
-      }).catch((err) => {
-        console.log(err.message);
-      })
-    })
+        .query(queryString,values).then((result) => {
+          user = result.rows[0];
+          if (!user) {
+   
+            return null;
+          }
+          req.session.userId = user.id;
+          res.send({user});
+          return user;
+        }).catch((err) => {
+          console.log(err.message);
+        });
+    });
 });
 
 module.exports = router;
